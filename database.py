@@ -49,6 +49,16 @@ def delete_patient(patient_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM patients WHERE id=?", (patient_id,))
         conn.commit()
+        check_and_vacuum_if_empty()
+
+def check_and_vacuum_if_empty():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM patients")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            cursor.execute("VACUUM") 
+        conn.commit()
 
 def reset_database_completely():
     with sqlite3.connect(DB_NAME) as conn:
