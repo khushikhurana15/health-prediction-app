@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from database import init_db, create_patient, read_all_patients, update_patient, delete_patient
 
 # Load API key and init database
-load_dotenv()
+load_dotenv(override=True)
 init_db()
 
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -30,7 +30,7 @@ def call_gemini(glucose, haemoglobin, cholesterol):
         possible risk levels (normal, diabetic risk, anemia, or cardiac risk).
         Be professional and direct. Under 30 words. No bullet points.
         """
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
