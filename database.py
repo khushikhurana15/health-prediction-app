@@ -7,7 +7,7 @@ def init_db():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY ,
                 full_name TEXT NOT NULL,
                 dob TEXT NOT NULL,
                 email TEXT NOT NULL,
