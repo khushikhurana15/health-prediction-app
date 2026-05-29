@@ -17,11 +17,6 @@ def init_db():
                 remarks TEXT
             )
         """)
-        cursor.execute("SELECT COUNT(*) FROM patients")
-        count = cursor.fetchone()[0]
-        if count == 0:
-            cursor.execute("DELETE FROM sqlite_sequence WHERE name='patients'")
-            
         conn.commit()
 
 def create_patient(name, dob, email, glucose, haemoglobin, cholesterol, remarks):
