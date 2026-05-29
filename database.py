@@ -7,7 +7,7 @@ def init_db():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY ,
+                id INTEGER PRIMARY KEY,
                 full_name TEXT NOT NULL,
                 dob TEXT NOT NULL,
                 email TEXT NOT NULL,
@@ -49,20 +49,29 @@ def delete_patient(patient_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM patients WHERE id=?", (patient_id,))
         conn.commit()
-        check_and_vacuum_if_empty()
+    check_and_vacuum_if_empty()
 
 def check_and_vacuum_if_empty():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM patients")
         count = cursor.fetchone()[0]
-        if count == 0:
-            cursor.execute("VACUUM") 
-        conn.commit()
+        
+    if count == 0:
+        conn = sqlite3.connect(DB_NAME)
+        conn.isolation_level = None  
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM sqlite_sequence WHERE name='patients'")
+        except sqlite3.OperationalError:
+            pass 
+        
+        cursor.execute("VACUUM") 
+        conn.close()
 
 def reset_database_completely():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS patients")
         conn.commit()
-    init_db() 
+    init_db()
