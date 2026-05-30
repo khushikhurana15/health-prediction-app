@@ -51,7 +51,10 @@ with col1:
     st.subheader("➕ Add New Patient")
     with st.form("add_patient_form", clear_on_submit=True):
         full_name   = st.text_input("Full Name")
-        dob         = st.date_input("Date of Birth", max_value=date.today())
+        dob         = st.date_input("Date of Birth",
+                             min_value=date(1900, 1, 1),
+                             max_value=date.today(),
+                             value=date(1990, 1, 1))
         email       = st.text_input("Email Address")
 
         st.markdown("**Blood Test Values**")
