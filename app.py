@@ -4,7 +4,7 @@ import os
 from datetime import date
 import google.generativeai as genai
 from dotenv import load_dotenv
-from database import init_db, create_patient, read_all_patients, update_patient, delete_patient
+from database import init_db, create_patient, read_all_patients, update_patient, delete_patient, check_duplicate
 
 # Load API key and init database
 load_dotenv(override=True)
@@ -50,14 +50,14 @@ col1, col2 = st.columns([1, 1.5])
 with col1:
     st.subheader("➕ Add New Patient")
     with st.form("add_patient_form", clear_on_submit=True):
-        full_name    = st.text_input("Full Name")
-        dob          = st.date_input("Date of Birth", max_value=date.today())
-        email        = st.text_input("Email Address")
+        full_name   = st.text_input("Full Name")
+        dob         = st.date_input("Date of Birth", max_value=date.today())
+        email       = st.text_input("Email Address")
 
         st.markdown("**Blood Test Values**")
-        glucose      = st.number_input("Glucose (mg/dL)",      min_value=0.0, step=1.0)
-        haemoglobin  = st.number_input("Haemoglobin (g/dL)",   min_value=0.0, step=0.1)
-        cholesterol  = st.number_input("Cholesterol (mg/dL)",  min_value=0.0, step=1.0)
+        glucose     = st.number_input("Glucose (mg/dL)",     min_value=0.0, step=1.0)
+        haemoglobin = st.number_input("Haemoglobin (g/dL)",  min_value=0.0, step=0.1)
+        cholesterol = st.number_input("Cholesterol (mg/dL)", min_value=0.0, step=1.0)
 
         submit = st.form_submit_button("🔬 Generate AI Remarks & Save")
 
@@ -65,11 +65,13 @@ with col1:
             if not full_name or not email:
                 st.error("Name and Email cannot be empty.")
             elif not is_valid_email(email):
-                st.error("Please enter a valid email address.")
+                st.error("Invalid email format. Please enter a valid email address.")
             elif dob > date.today():
                 st.error("Date of birth cannot be a future date.")
             elif glucose == 0 or haemoglobin == 0 or cholesterol == 0:
                 st.error("Blood test values must be greater than 0.")
+            elif check_duplicate(full_name, str(dob), email):
+                st.error("Duplicate record — a patient with the same name, date of birth, and email already exists.")
             else:
                 with st.spinner("Analyzing with MIRA AI Engine..."):
                     remarks = call_gemini(glucose, haemoglobin, cholesterol)
@@ -89,17 +91,17 @@ with col2:
             p_id, name, p_dob, p_email, glu, hgb, chol, rem = record
 
             with st.expander(f"🧑‍⚕️ #{p_id} — {name}"):
-                e_name  = st.text_input("Full Name",  value=name,    key=f"n_{p_id}")
-                e_dob   = st.text_input("DOB (YYYY-MM-DD)", value=p_dob, key=f"d_{p_id}")
-                e_email = st.text_input("Email",      value=p_email, key=f"e_{p_id}")
+                e_name  = st.text_input("Full Name",        value=name,    key=f"n_{p_id}")
+                e_dob   = st.text_input("DOB (YYYY-MM-DD)", value=p_dob,   key=f"d_{p_id}")
+                e_email = st.text_input("Email",            value=p_email, key=f"e_{p_id}")
 
                 c1, c2, c3 = st.columns(3)
                 with c1:
-                    e_glu  = st.number_input("Glucose",      value=glu,  key=f"g_{p_id}")
+                    e_glu  = st.number_input("Glucose",     value=glu,  key=f"g_{p_id}")
                 with c2:
-                    e_hgb  = st.number_input("Haemoglobin",  value=hgb,  key=f"h_{p_id}")
+                    e_hgb  = st.number_input("Haemoglobin", value=hgb,  key=f"h_{p_id}")
                 with c3:
-                    e_chol = st.number_input("Cholesterol",  value=chol, key=f"c_{p_id}")
+                    e_chol = st.number_input("Cholesterol", value=chol, key=f"c_{p_id}")
 
                 st.info(f"**AI Remarks:** {rem}")
 

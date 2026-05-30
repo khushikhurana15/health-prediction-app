@@ -19,6 +19,15 @@ def init_db():
         """)
         conn.commit()
 
+def check_duplicate(name, dob, email):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT COUNT(*) FROM patients 
+            WHERE full_name=? AND dob=? AND email=?
+        """, (name, dob, email))
+        return cursor.fetchone()[0] > 0
+
 def create_patient(name, dob, email, glucose, haemoglobin, cholesterol, remarks):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
@@ -56,17 +65,15 @@ def check_and_vacuum_if_empty():
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM patients")
         count = cursor.fetchone()[0]
-        
     if count == 0:
         conn = sqlite3.connect(DB_NAME)
-        conn.isolation_level = None  
+        conn.isolation_level = None
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM sqlite_sequence WHERE name='patients'")
         except sqlite3.OperationalError:
-            pass 
-        
-        cursor.execute("VACUUM") 
+            pass
+        cursor.execute("VACUUM")
         conn.close()
 
 def reset_database_completely():
