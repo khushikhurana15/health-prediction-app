@@ -11,7 +11,7 @@ A Health Prediction Application built with Python and Streamlit that collects pa
 ## Tech Stack
 - **Frontend & Backend:** Python + Streamlit
 - **Database:** SQLite
-- **AI Integration:** Google Gemini 2.5 Flash API
+- **AI Integration:** Google Gemini 2.5 Flash Lite API
 
 ## Project Structure
 health-prediction-app/
